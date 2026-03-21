@@ -5,8 +5,8 @@
 #include "logger.h"
 
 // Define these in your private config or use placeholders
-#define FIREBASE_HOST "your-project-default-rtdb.firebaseio.com"
-#define API_KEY "your-api-key"
+#define FIREBASE_HOST "tucapyenergy-default-rtdb.europe-west1.firebasedatabase.app"
+#define API_KEY "AIzaSyAA9CCYeT44Mt8BLOkqpL4uu3cp5gpaevs"
 
 namespace FirebaseHandler {
 

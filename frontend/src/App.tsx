@@ -6,7 +6,6 @@ import {
   Cpu, 
   Terminal, 
   RefreshCcw, 
-  Globe, 
   Wifi, 
   WifiOff, 
   Info
