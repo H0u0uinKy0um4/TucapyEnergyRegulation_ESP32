@@ -21,6 +21,15 @@
 #define OUT7 27
 #define OUT8 32
 const int outputs[] = {OUT1, OUT2, OUT3, OUT4, OUT5, OUT6, OUT7, OUT8};
+const int n_outputs=8;
+#define HORNI_PROUD 2
+#define SPODNI_PROUD 0  
+
+#define HORNI_SOC 80
+#define SPODNI_SOC 60
+
+bool power_mode=false;
+int idx=0;
 
 WebSocketsServer webSocket(81);
 WebServer server(80);
@@ -43,8 +52,29 @@ void handleRoot() {
     FIRMWARE_VERSION));
 }
 
+void turn_on()
+{
+    if(idx<n_outputs)digitalWrite(outputs[idx],HIGH);
+    idx++;
+    return;
+}
+void turn_off()
+{
+
+    if (idx>0)idx--;
+    else return;
+    digitalWrite(outputs[idx],LOW);
+    return;
+}
+
+
 void setup() {
     Serial.begin(115200);
+    for (size_t i = 0; i < n_outputs; i++)
+    {
+        pinMode(outputs[i],OUTPUT);
+    }
+    
 
     // Inicializace Modbus
     ModbusHandler::setup();
@@ -68,16 +98,21 @@ void setup() {
 
 void loop() {
     static unsigned long lastOTA = millis();
-
     server.handleClient();
     webSocket.loop();
 
     // OTA kontrola az po par minutach
-    if (millis() > 300000 && (millis() - lastOTA > 3600000)) {
+    if (millis() > 60000 && (millis() - lastOTA > 60000)) {
         lastOTA = millis(); 
         OTA::check();
     }
 
     // Čtení dat z měniče
     ModbusHandler::update();
+    if(ModbusHandler::battery_soc<SPODNI_SOC)power_mode=false;
+    if(ModbusHandler::battery_soc>=HORNI_SOC)power_mode=true;
+    if(power_mode && (ModbusHandler::battery_I>=HORNI_PROUD))turn_on();
+    if(power_mode && (ModbusHandler::battery_I<=SPODNI_PROUD))turn_off();
+
+    
 }
