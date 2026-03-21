@@ -9,11 +9,23 @@
 
 #define WIFI_SSID "DvorNet"
 #define WIFI_PASS "dvor62tuc"
+#define FIRMWARE_VERSION "2026-03-21 21:45"
 
 // --- KLASICKÉ ZAPOJENÍ ---
 #define MODBUS_RX_PIN 16
 #define MODBUS_TX_PIN 17
 #define DE_RE_PIN 18 
+
+#define OUT1 19
+#define OUT2 21
+#define OUT3 22
+#define OUT4 23
+#define OUT5 25
+#define OUT6 26
+#define OUT7 27
+#define OUT8 32
+
+const int outputs[] = {OUT1, OUT2, OUT3, OUT4, OUT5, OUT6, OUT7, OUT8};
 
 #define SLAVE_ID 247
 #define REG_BATTERY_POWER 30258
@@ -95,7 +107,7 @@ bool readBatteryData()
 }
 
 void handleRoot() {
-  server.send(200, "text/html", WebUI::getDashboardHTML(battery_P, battery_I, grid_I, battery_soc, status_msg, logBuffer));
+  server.send(200, "text/html", WebUI::getDashboardHTML(battery_P, battery_I, grid_I, battery_soc, status_msg, logBuffer, FIRMWARE_VERSION));
 }
 
 void setup() {

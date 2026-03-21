@@ -3,7 +3,7 @@
 
 namespace WebUI {
 
-String getDashboardHTML(float battery_P, float battery_I, float grid_I, float battery_soc, String status_msg, String initial_logs) {
+String getDashboardHTML(float battery_P, float battery_I, float grid_I, float battery_soc, String status_msg, String initial_logs, String version) {
     // Escape logs for JS
     String escapedLogs = initial_logs;
     escapedLogs.replace("\n", "\\n");
@@ -100,9 +100,11 @@ String getDashboardHTML(float battery_P, float battery_I, float grid_I, float ba
         #ws-status { padding: 4px 8px; border-radius: 4px; font-size: 10px; }
         .status-online { background: rgba(16, 185, 129, 0.2); color: var(--success); }
         .status-offline { background: rgba(239, 68, 68, 0.2); color: var(--error); }
+        .version { position: absolute; top: 20px; right: 20px; font-size: 10px; opacity: 0.4; pointer-events: none; }
     </style>
 </head>
 <body>
+    <div class='version'>)raw" + version + R"raw(</div>
     <div class='container'>
         <h1>Tucapy Energy</h1>
         <div class='dashboard'>
