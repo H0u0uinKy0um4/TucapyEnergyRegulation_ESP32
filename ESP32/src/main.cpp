@@ -36,7 +36,7 @@ String fetchString(String url) {
 }
 
 void checkAndUpdate() {
-    Serial.println("Kontroluji verzi...");
+    Serial.println("Kontroluji verzi...(xd)");
     String latestSHA = fetchString(VERSION_URL);
     if (latestSHA.isEmpty()) return;
 
@@ -68,7 +68,7 @@ void checkAndUpdate() {
 
 void setup() {
     Serial.begin(115200);
-    WiFi.begin("SSID", "HESLO");
+    WiFi.begin("DvorNet", "dvor62tuc");
     while (WiFi.status() != WL_CONNECTED) delay(500);
     checkAndUpdate();
 }
@@ -76,5 +76,5 @@ void setup() {
 void loop() {
     // každých 60 sekund zkontroluj
     checkAndUpdate();
-    delay(60000);
+    delay(2000);
 }
