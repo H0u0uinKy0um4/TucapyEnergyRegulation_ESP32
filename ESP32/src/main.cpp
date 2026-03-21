@@ -36,11 +36,18 @@ String fetchString(String url) {
 }
 
 void checkAndUpdate() {
-    Serial.println("Kontroluji verzi...(xd)");
+    Serial.println("Kontroluji verzi...dx");
     String latestSHA = fetchString(VERSION_URL);
-    if (latestSHA.isEmpty()) return;
+    if (latestSHA.isEmpty()) {
+        Serial.println("Nepodarilo se ziskat verzi.");
+        return;
+    }
 
-    if (latestSHA == getCurrentSHA()) {
+    String currentSHA = getCurrentSHA();
+    Serial.println("Ulozena SHA:  " + currentSHA);
+    Serial.println("GitHub SHA:   " + latestSHA);
+
+    if (latestSHA == currentSHA) {
         Serial.println("Firmware je aktualni.");
         return;
     }
