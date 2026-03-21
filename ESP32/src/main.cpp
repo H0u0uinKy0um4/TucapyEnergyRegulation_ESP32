@@ -54,8 +54,11 @@ void handleRoot() {
 
 void turn_on()
 {
-    if(idx<n_outputs)digitalWrite(outputs[idx],HIGH);
-    idx++;
+    if(idx<n_outputs)
+    {
+        digitalWrite(outputs[idx],HIGH);
+        idx++;
+    }
     return;
 }
 void turn_off()
@@ -70,10 +73,6 @@ void turn_off()
 
 void setup() {
     Serial.begin(115200);
-    for (size_t i = 0; i < n_outputs; i++)
-    {
-        pinMode(outputs[i],OUTPUT);
-    }
     
 
     // Inicializace Modbus
@@ -108,11 +107,12 @@ void loop() {
     }
 
     // Čtení dat z měniče
-    ModbusHandler::update();
-    if(ModbusHandler::battery_soc<SPODNI_SOC)power_mode=false;
-    if(ModbusHandler::battery_soc>=HORNI_SOC)power_mode=true;
-    if(power_mode && (ModbusHandler::battery_I>=HORNI_PROUD))turn_on();
-    if(power_mode && (ModbusHandler::battery_I<=SPODNI_PROUD))turn_off();
-
+    if(ModbusHandler::update())
+    {
+        if(ModbusHandler::battery_soc<SPODNI_SOC)power_mode=false;
+        if(ModbusHandler::battery_soc>=HORNI_SOC)power_mode=true;
+        if(power_mode && (ModbusHandler::battery_I>=HORNI_PROUD))turn_on();
+        if(power_mode && (ModbusHandler::battery_I<=SPODNI_PROUD))turn_off();
+    }
     
 }
