@@ -53,7 +53,7 @@ const App: React.FC = () => {
     const logsRef = ref(db, 'system_logs');
 
     // Subscribe to energy updates
-    const unsubscribeEnergy = onValue(energyRef, (snapshot) => {
+    const unsubscribeEnergy = onValue(energyRef, (snapshot: any) => {
       if (snapshot.exists()) {
         const val = snapshot.val();
         setData(prev => ({
@@ -70,7 +70,7 @@ const App: React.FC = () => {
     });
 
     // Subscribe to logs
-    const unsubscribeLogs = onValue(logsRef, (snapshot) => {
+    const unsubscribeLogs = onValue(logsRef, (snapshot: any) => {
       if (snapshot.exists()) {
         const logVal = snapshot.val();
         // Assuming logs are stored as a long string or an array
