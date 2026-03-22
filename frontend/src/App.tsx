@@ -97,6 +97,11 @@ const App: React.FC = () => {
               ...prev,
               logs: logBody
             }));
+          } else {
+            setData(prev => ({
+              ...prev,
+              logs: 'Čekám na logy z ESP32...\nNode /console_logs zatím neexistuje v Firebase.'
+            }));
           }
         });
       })

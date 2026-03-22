@@ -10,28 +10,27 @@
 namespace FirebaseHandler {
 
 FirebaseData fbdo;
+FirebaseData fbdo_logs;  // Samostatný objekt pro konzolové logy
 FirebaseAuth auth;
 FirebaseConfig config;
-bool firebaseReady = false;
 
 void setup() {
     config.database_url = FIREBASE_DATABASE_URL;
     config.api_key = API_KEY;
     
-    // Test mode – ESP32 nemá přihlašovací údaje, takže musí být true
+    // Test mode – ESP32 nemá přihlašovací údaje
     config.signer.test_mode = true;
 
     Firebase.begin(&config, &auth);
     Firebase.reconnectWiFi(true);
 
-    // Počkáme krátce na inicializaci
+    // Počkáme na inicializaci
     unsigned long t = millis();
     while (!Firebase.ready() && millis() - t < 5000) {
         delay(100);
     }
-
-    firebaseReady = Firebase.ready();
-    if (firebaseReady) {
+    
+    if (Firebase.ready()) {
         Serial.println("Firebase: READY");
     } else {
         Serial.println("Firebase: NOT READY after 5s");
@@ -66,15 +65,15 @@ void updateData(float battery_P, float battery_I, float grid_I, float battery_so
 void pushConsoleLogs(const String& logBuffer) {
     if (!Firebase.ready()) return;
     
-    // Uložíme posledních max 2000 znaků logu
     String trimmed = logBuffer;
     if (trimmed.length() > 2000) {
         trimmed = trimmed.substring(trimmed.length() - 2000);
     }
 
-    if (!Firebase.RTDB.setString(&fbdo, "/console_logs", trimmed)) {
-        // Tiše ignorujeme chybu konzolových logů
+    if (!Firebase.RTDB.setString(&fbdo_logs, "/console_logs", trimmed)) {
+        Serial.println("Console log push failed: " + fbdo_logs.errorReason());
     }
 }
 
 } // namespace FirebaseHandler
+
