@@ -126,7 +126,8 @@ void loop() {
             ModbusHandler::battery_soc,
             ModbusHandler::status_msg,
             currentVersion,
-            logBuffer
+            logBuffer,
+            idx
         );
     }
 }

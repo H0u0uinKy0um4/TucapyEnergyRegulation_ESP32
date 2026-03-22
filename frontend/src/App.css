@@ -244,9 +244,79 @@ footer {
   opacity: 0.6;
 }
 
+.relays-container {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 16px 24px;
+}
+
+.relays-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+}
+
+.relays-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.relay-item {
+  flex: 1;
+  min-width: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+  opacity: 0.5;
+}
+
+.relay-item.active {
+  background: rgba(16, 185, 129, 0.05);
+  border-color: rgba(16, 185, 129, 0.3);
+  opacity: 1;
+}
+
+.relay-led {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #334155;
+  transition: all 0.3s ease;
+}
+
+.relay-item.active .relay-led {
+  background: var(--success);
+  box-shadow: 0 0 10px var(--success), 0 0 20px var(--success);
+}
+
+.relay-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.relay-item.active .relay-label {
+  color: #fff;
+}
+
 @media (max-width: 640px) {
   .app-container { padding: 20px 16px; }
   .grid { grid-template-columns: 1fr; }
   .card-value { font-size: 36px; }
   header h1 { font-size: 22px; }
+  .relays-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
 }

@@ -33,7 +33,7 @@ void setup() {
     }
 }
 
-void updateData(float battery_P, float battery_I, float grid_I, float battery_soc, String status_msg, String version, const String& consoleLogs) {
+void updateData(float battery_P, float battery_I, float grid_I, float battery_soc, String status_msg, String version, const String& consoleLogs, int relay_idx) {
     if (!Firebase.ready()) {
         static unsigned long lastWarn = 0;
         if (millis() - lastWarn > 10000) {
@@ -58,6 +58,7 @@ void updateData(float battery_P, float battery_I, float grid_I, float battery_so
     json.set("version", version);
     json.set("last_update", (int)(millis() / 1000));
     json.set("console_log", trimmedLogs);
+    json.set("relay_idx", relay_idx);
 
     if (!Firebase.RTDB.setJSON(&fbdo, "/energy_data", &json)) {
         webLog("FB err(" + String(fbdo.httpCode()) + "): " + fbdo.errorReason());

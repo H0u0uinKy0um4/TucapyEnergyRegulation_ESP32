@@ -27,6 +27,7 @@ interface DashboardData {
   version: string;
   connected: boolean;
   authenticated: boolean;
+  relayIdx: number;
 }
 
 const App: React.FC = () => {
@@ -39,7 +40,8 @@ const App: React.FC = () => {
     logs: 'Connecting to Firebase...',
     version: '1.0.0-rev',
     connected: false,
-    authenticated: false
+    authenticated: false,
+    relayIdx: 0
   });
 
   const consoleRef = useRef<HTMLPreElement>(null);
@@ -75,6 +77,7 @@ const App: React.FC = () => {
               statusMsg: val.status_msg || prev.statusMsg,
               version: val.version || prev.version,
               logs: val.console_log || prev.logs,
+              relayIdx: val.relay_idx || 0,
               connected: true
             }));
           } else {
@@ -158,6 +161,26 @@ const App: React.FC = () => {
           index={3}
         />
       </div>
+
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="relays-container"
+      >
+        <div className="relays-header">
+          <Activity size={16} />
+          <span>ACTIVE OUTPUTS (RELAYS)</span>
+        </div>
+        <div className="relays-grid">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className={`relay-item ${i < data.relayIdx ? 'active' : ''}`}>
+              <div className="relay-led" />
+              <span className="relay-label">OUT{i + 1}</span>
+            </div>
+          ))}
+        </div>
+      </motion.div>
 
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
