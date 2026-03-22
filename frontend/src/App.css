@@ -81,6 +81,13 @@ header h1 {
   border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
+.status-badge.secure {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+  border-color: rgba(16, 185, 129, 0.2);
+  gap: 4px;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));

@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getDatabase } from "firebase/database";
 import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
 // Firebase configuration using environment variables
 // Add these to your .env file
@@ -16,6 +17,9 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+// Auth for secure access
+export const auth = getAuth(app);
 
 // Realtime Database for fast energy updates
 export const db = getDatabase(app);

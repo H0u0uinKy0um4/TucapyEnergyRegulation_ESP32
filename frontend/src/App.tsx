@@ -8,11 +8,13 @@ import {
   RefreshCcw, 
   Wifi, 
   WifiOff, 
-  Info
+  Info,
+  Lock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ref, onValue } from 'firebase/database';
-import { db } from './firebase';
+import { signInAnonymously } from 'firebase/auth';
+import { db, auth } from './firebase';
 import './App.css';
 
 interface DashboardData {
@@ -24,6 +26,7 @@ interface DashboardData {
   logs: string;
   version: string;
   connected: boolean;
+  authenticated: boolean;
 }
 
 const App: React.FC = () => {
@@ -35,7 +38,8 @@ const App: React.FC = () => {
     statusMsg: 'Initializace...',
     logs: 'Connecting to Firebase...',
     version: '1.0.0-rev',
-    connected: false
+    connected: false,
+    authenticated: false
   });
 
   const consoleRef = useRef<HTMLPreElement>(null);
@@ -47,51 +51,63 @@ const App: React.FC = () => {
     }
   }, [data.logs]);
 
-  // Connect to Firebase Realtime Database
+  // Handle Authentication and Firebase connection
   useEffect(() => {
-    const energyRef = ref(db, 'energy_data');
-    const logsRef = ref(db, 'system_logs');
+    let unsubscribeEnergy: () => void;
+    let unsubscribeLogs: () => void;
 
-    // Subscribe to energy updates
-    const unsubscribeEnergy = onValue(energyRef, (snapshot: any) => {
-      if (snapshot.exists()) {
-        const val = snapshot.val();
-        setData(prev => ({
-          ...prev,
-          batteryPower: val.battery_P || 0,
-          batteryCurrent: val.battery_I || 0,
-          gridCurrent: val.grid_I || 0,
-          soc: val.battery_soc || 0,
-          statusMsg: val.status_msg || prev.statusMsg,
-          version: val.version || prev.version,
-          connected: true
-        }));
-      } else {
-        // Node empty: ESP32 likely hasn't pushed yet
-        setData(prev => ({
-          ...prev,
-          statusMsg: 'Čekám na data z procesoru...',
-          connected: true
-        }));
-      }
-    });
+    // Securely sign in anonymously
+    signInAnonymously(auth)
+      .then(() => {
+        setData(prev => ({ ...prev, authenticated: true }));
+        
+        const energyRef = ref(db, 'energy_data');
+        const logsRef = ref(db, 'system_logs');
 
-    // Subscribe to logs
-    const unsubscribeLogs = onValue(logsRef, (snapshot: any) => {
-      if (snapshot.exists()) {
-        const logVal = snapshot.val();
-        // Assuming logs are stored as a long string or an array
-        const logBody = typeof logVal === 'string' ? logVal : JSON.stringify(logVal, null, 2);
-        setData(prev => ({
-          ...prev,
-          logs: logBody
-        }));
-      }
-    });
+        // Subscribe to energy updates
+        unsubscribeEnergy = onValue(energyRef, (snapshot: any) => {
+          if (snapshot.exists()) {
+            const val = snapshot.val();
+            setData(prev => ({
+              ...prev,
+              batteryPower: val.battery_P || 0,
+              batteryCurrent: val.battery_I || 0,
+              gridCurrent: val.grid_I || 0,
+              soc: val.battery_soc || 0,
+              statusMsg: val.status_msg || prev.statusMsg,
+              version: val.version || prev.version,
+              connected: true
+            }));
+          } else {
+            // Node empty: ESP32 likely hasn't pushed yet
+            setData(prev => ({
+              ...prev,
+              statusMsg: 'Čekám na data z procesoru...',
+              connected: true
+            }));
+          }
+        });
+
+        // Subscribe to logs
+        unsubscribeLogs = onValue(logsRef, (snapshot: any) => {
+          if (snapshot.exists()) {
+            const logVal = snapshot.val();
+            const logBody = typeof logVal === 'string' ? logVal : JSON.stringify(logVal, null, 2);
+            setData(prev => ({
+              ...prev,
+              logs: logBody
+            }));
+          }
+        });
+      })
+      .catch((error) => {
+        console.error("Auth error:", error);
+        setData(prev => ({ ...prev, statusMsg: 'Chyba zabezpečení (Auth)', logs: `Auth Error: ${error.message}` }));
+      });
 
     return () => {
-      unsubscribeEnergy();
-      unsubscribeLogs();
+      if (unsubscribeEnergy) unsubscribeEnergy();
+      if (unsubscribeLogs) unsubscribeLogs();
     };
   }, []);
 
@@ -110,10 +126,19 @@ const App: React.FC = () => {
         <motion.div 
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          className={`status-badge ${data.connected ? '' : 'offline'}`}
+          className="header-right"
+          style={{ display: 'flex', gap: '8px' }}
         >
-          {data.connected ? <Wifi size={14} /> : <WifiOff size={14} />}
-          {data.connected ? 'Cloud Connected' : 'Connecting...'}
+          {data.authenticated && (
+            <div className="status-badge secure">
+              <Lock size={12} />
+              Secure
+            </div>
+          )}
+          <div className={`status-badge ${data.connected ? '' : 'offline'}`}>
+            {data.connected ? <Wifi size={14} /> : <WifiOff size={14} />}
+            {data.connected ? 'Cloud Connected' : 'Connecting...'}
+          </div>
         </motion.div>
       </header>
 

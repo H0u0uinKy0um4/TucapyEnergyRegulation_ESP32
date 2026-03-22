@@ -5,7 +5,8 @@
 #include "logger.h"
 
 // Define these in your private config or use placeholders
-#define FIREBASE_DATABASE_URL "https://tucapyenergy-default-rtdb.europe-west1.firebasedatabase.app"
+// Pokud používáte novější verzi knihovny Mobizt, URL má být většinou bez "https://"
+#define FIREBASE_DATABASE_URL "tucapyenergy-default-rtdb.europe-west1.firebasedatabase.app"
 #define API_KEY "AIzaSyAA9CCYeT44Mt8BLOkqpL4uu3cp5gpaevs"
 
 namespace FirebaseHandler {
@@ -18,18 +19,21 @@ void setup() {
     config.database_url = FIREBASE_DATABASE_URL;
     config.api_key = API_KEY;
     
-    // Povolit přístup bez přihlášení (pokud jsou pravidla v Firebase na "true")
-    config.signer.test_mode = true;
+    // Test mode vypnut - nyní vyžadujeme autentizaci (anonymní nebo email)
+    config.signer.test_mode = false;
 
-    // Connect without auth
     Firebase.begin(&config, &auth);
     Firebase.reconnectWiFi(true);
 
-    // Testovací zápis hned po startu, aby databáze nebyla "null"
-    Firebase.RTDB.setString(&fbdo, "/system_logs", "ESP32 System Started - Firebase Connected");
+    // Prvotní zápis – pokud se nezdaří, uvidíme chybu hned v sériovém portu
+    if (!Firebase.RTDB.setString(&fbdo, "/system_logs", "ESP32 System Started (Authenticated)")) {
+        Serial.printf("Firebase log error: %s\n", fbdo.errorReason().c_str());
+    }
 }
 
 void updateData(float battery_P, float battery_I, float grid_I, float battery_soc, String status_msg, String version) {
+    if (!Firebase.ready()) return;
+
     FirebaseJson json;
     json.set("battery_P", battery_P);
     json.set("battery_I", battery_I);
@@ -40,9 +44,10 @@ void updateData(float battery_P, float battery_I, float grid_I, float battery_so
     json.set("last_update", String(millis()));
 
     if (Firebase.RTDB.setJSON(&fbdo, "/energy_data", &json)) {
-        // webLog("Firebase update OK");
+        // OK
     } else {
-        webLog("Firebase error: " + fbdo.errorReason());
+        // Pokud to stále nefunguje, vypíšeme přesnou příčinu
+        webLog("Firebase error (" + String(fbdo.httpCode()) + "): " + fbdo.errorReason(), true);
     }
 }
 
