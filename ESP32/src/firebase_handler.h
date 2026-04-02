@@ -7,6 +7,9 @@
 #define FIREBASE_DATABASE_URL "tucapyenergy-default-rtdb.europe-west1.firebasedatabase.app"
 #define API_KEY "AIzaSyAA9CCYeT44Mt8BLOkqpL4uu3cp5gpaevs"
 
+#define USER_EMAIL "esp32@tucapy.cz"
+#define USER_PASSWORD "123456"
+
 
 
 namespace FirebaseHandler {
@@ -19,7 +22,9 @@ FirebaseConfig config;
 void setup() {
     config.database_url = FIREBASE_DATABASE_URL;
     config.api_key = API_KEY;
-    config.signer.test_mode = true;
+
+    auth.user.email = USER_EMAIL;
+    auth.user.password = USER_PASSWORD;
 
     Firebase.begin(&config, &auth);
     Firebase.reconnectWiFi(true);
