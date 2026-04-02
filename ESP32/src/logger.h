@@ -5,10 +5,16 @@
 extern String logBuffer;
 #define MAX_LOG_SIZE 2048
 
+
 class Time
 {
     public:
-        Time()
+        static Time& getInstance()
+        {
+            static Time instance;
+            return instance;
+        }   
+        void begin()
         {
             //Wifi....
 
@@ -43,13 +49,13 @@ class Time
     tm time = {};
 };
 
-
+#define TIME Time::getInstance()
 
 
 
 inline void webLog(String msg, bool toSerial = false) {
-    Time t;
-    String logEntry = "[" + t.convert() + "s] " + msg;
+    TIME.update();
+    String logEntry = "[" + TIME.convert() + "s] " + msg;
     if (toSerial) {
         Serial.println(logEntry);
     }

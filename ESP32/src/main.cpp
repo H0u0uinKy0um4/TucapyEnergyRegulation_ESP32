@@ -69,7 +69,7 @@ void setup() {
         att++;
     }
 
-    
+    TIME.begin();
     ModbusHandler::setup();
     FirebaseHandler::setup();
 
