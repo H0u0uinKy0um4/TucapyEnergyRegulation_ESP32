@@ -49,6 +49,14 @@ void turn_off()
     return;
 }
 
+void shutdown()
+{
+    for(int pin: outputs)
+    {
+        digitalWrite(pin,HIGH);
+    }
+}
+
 
 void setup() {
     Serial.begin(115200);
@@ -97,7 +105,11 @@ void loop() {
     {
         static unsigned long lastSwitch = 0;
         
-        if(ModbusHandler::battery_soc<SPODNI_SOC)power_mode=false;
+        if(ModbusHandler::battery_soc<SPODNI_SOC)
+        {
+            power_mode=false;
+            if(outputs[0]==LOW)shutdown();
+        }
         if(ModbusHandler::battery_soc>=HORNI_SOC)power_mode=true;
         
         // Mezi přepnutím stupňů čekáme aspoň 10 vteřin pro ustálení

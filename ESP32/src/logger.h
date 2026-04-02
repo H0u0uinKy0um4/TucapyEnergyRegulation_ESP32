@@ -23,10 +23,10 @@ class Time
             tm time;
             while (!getLocalTime(&time))
             {
-            Serial.println("Čekám na čas...");
+            Serial.println("Setting up time...");
             delay(500);
             }
-            Serial.println("Čas synchronizován!");
+            Serial.println("Time was setup.");
         }
 
         bool update() {
