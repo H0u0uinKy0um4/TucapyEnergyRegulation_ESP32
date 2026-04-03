@@ -118,60 +118,72 @@ const App: React.FC = () => {
 
   // Handle Authentication and Firebase connection
   useEffect(() => {
-    let unsubscribeEnergy: () => void;
+    let unsubscribeBattery: (() => void) | undefined;
+    let unsubscribeWeb: (() => void) | undefined;
+    let unsubscribeRecovery: (() => void) | undefined;
 
     const unsubscribeAuth = onAuthStateChanged(auth, (user: User | null) => {
       if (user) {
         setData(prev => ({ ...prev, authenticated: true }));
         setIsAdmin(!user.isAnonymous);
 
-        // If not already subscribed, subscribe now
-        if (!unsubscribeEnergy) {
-          const energyRef = ref(db, 'energy_data');
-          unsubscribeEnergy = onValue(energyRef, (snapshot: any) => {
-            if (snapshot.exists()) {
-              const val = snapshot.val();
-              setData(prev => ({
-                ...prev,
-                batteryPower: val.battery_P || 0,
-                batteryCurrent: val.battery_I || 0,
-                gridCurrent: val.grid_I || 0,
-                soc: val.battery_soc || 0,
-                statusMsg: val.status_msg || prev.statusMsg,
-                version: val.version || prev.version,
-                logs: val.console_log || prev.logs,
-                relayIdx: val.relay_idx || 0,
-                connected: true,
-                lastUpdate: val.last_update || 0
-              }));
+        // --- 1. DATA O ELEKTŘINĚ ---
+        const batteryRef = ref(db, 'battery_data');
+        unsubscribeBattery = onValue(batteryRef, (snapshot) => {
+          if (snapshot.exists()) {
+            const val = snapshot.val();
+            setData(prev => ({
+              ...prev,
+              batteryPower: val.P || 0,
+              batteryCurrent: val.I || 0,
+              gridCurrent: val.grid_I || 0,
+              soc: val.soc || 0,
+              connected: true
+            }));
 
-              // Add to history for real-time charts
-              const now = new Date();
-              const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+            // Historie pro grafy
+            const now = new Date();
+            const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+            setDataHistory(prev => {
+              const newPoint: HistoryPoint = {
+                time: timeStr,
+                soc: val.soc || 0,
+                power: val.P || 0,
+                grid: val.grid_I || 0,
+                current: val.I || 0
+              };
+              const next = [...prev, newPoint];
+              return next.length > 100 ? next.slice(next.length - 100) : next;
+            });
+          }
+        });
 
-              setDataHistory(prev => {
-                const newPoint: HistoryPoint = {
-                  time: timeStr,
-                  soc: val.battery_soc || 0,
-                  power: val.battery_P || 0,
-                  grid: val.grid_I || 0,
-                  current: val.battery_I || 0
-                };
+        // --- 2. SYSTÉMOVÁ DATA (WEB & LOGY) ---
+        const webDataRef = ref(db, 'web_data');
+        unsubscribeWeb = onValue(webDataRef, (snapshot) => {
+          if (snapshot.exists()) {
+            const val = snapshot.val();
+            setData(prev => ({
+              ...prev,
+              statusMsg: val.status_msg || prev.statusMsg,
+              version: val.version || prev.version,
+              logs: val.console_log || prev.logs
+            }));
+          }
+        });
 
-                // Keep last 100 points
-                const next = [...prev, newPoint];
-                if (next.length > 100) return next.slice(next.length - 100);
-                return next;
-              });
-            } else {
-              setData(prev => ({
-                ...prev,
-                statusMsg: 'Čekám na data z procesoru...',
-                connected: true
-              }));
-            }
-          });
-        }
+        // --- 3. RECOVERY & STAV ---
+        const recoveryRef = ref(db, 'recovery_data');
+        unsubscribeRecovery = onValue(recoveryRef, (snapshot) => {
+          if (snapshot.exists()) {
+            const val = snapshot.val();
+            setData(prev => ({
+              ...prev,
+              relayIdx: val.relay_idx || 0,
+              lastUpdate: val.last_update || 0
+            }));
+          }
+        });
       } else {
         // Fallback to anonymous for basic viewing
         setActiveTab('dashboard');
@@ -184,7 +196,9 @@ const App: React.FC = () => {
 
     return () => {
       unsubscribeAuth();
-      if (unsubscribeEnergy) unsubscribeEnergy();
+      if (unsubscribeBattery) unsubscribeBattery();
+      if (unsubscribeWeb) unsubscribeWeb();
+      if (unsubscribeRecovery) unsubscribeRecovery();
     };
   }, []);
 
@@ -274,9 +288,9 @@ const App: React.FC = () => {
             </div>
             {isAdmin && (
               <div className="admin-subtitle">
-                {activeTab === 'dashboard' ? 'Energetický přehled' : 
-                 activeTab === 'graphs' ? 'Analýza dat' :
-                 activeTab === 'settings' ? 'Konfigurace' : 'Systémová konzole'}
+                {activeTab === 'dashboard' ? 'Energetický přehled' :
+                  activeTab === 'graphs' ? 'Analýza dat' :
+                    activeTab === 'settings' ? 'Konfigurace' : 'Systémová konzole'}
               </div>
             )}
           </motion.div>

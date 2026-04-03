@@ -26,8 +26,11 @@ void saveSHA(String sha) {
 }
 
 String fetchString(String url) {
+    WiFiClientSecure client;
+    client.setInsecure();
+
     HTTPClient http;
-    http.begin(url);
+    http.begin(client, url);
     http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
     int code = http.GET();
     webLog("HTTP GET " + url + " -> " + String(code));

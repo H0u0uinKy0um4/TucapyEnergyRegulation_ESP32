@@ -81,21 +81,36 @@ void updateData(float battery_P, float battery_I, float grid_I, float battery_so
         trimmedLogs = trimmedLogs.substring(trimmedLogs.length() - 1500);
     }
 
-    FirebaseJson json;
-    json.set("battery_P", battery_P);
-    json.set("battery_I", battery_I);
-    json.set("grid_I", grid_I);
-    json.set("battery_soc", battery_soc);
-    json.set("status_msg", status_msg);
-    json.set("version", version);
-    json.set("console_log", trimmedLogs);
-    json.set("relay_idx", relay_idx);
-    json.set("power_mod",power_mode);
-    json.set("last_update", (int)time(NULL));
+    // --- Baterie ---
+    FirebaseJson batteryJson;
+    batteryJson.set("P", battery_P);
+    batteryJson.set("I", battery_I);
+    batteryJson.set("grid_I", grid_I);
+    batteryJson.set("soc", battery_soc);
 
-    if (!Firebase.RTDB.setJSON(&fbdo, "/energy_data", &json)) {
-        webLog("FB err(" + String(fbdo.httpCode()) + "): " + fbdo.errorReason());
+    if (!Firebase.RTDB.setJSON(&fbdo, "/battery_data", &batteryJson)) {
+        webLog("FB err(battery) " + String(fbdo.httpCode()) + ": " + fbdo.errorReason());
     }
-}
+
+    // --- Systém ---
+    FirebaseJson systemJson;
+    systemJson.set("status_msg", status_msg);
+    systemJson.set("version", version);
+    systemJson.set("console_log", trimmedLogs);
+
+    if (!Firebase.RTDB.setJSON(&fbdo, "/web_data", &systemJson)) {
+        webLog("FB err(system) " + String(fbdo.httpCode()) + ": " + fbdo.errorReason());
+    }
+
+    // --- Řízení ---
+    FirebaseJson controlJson;
+    controlJson.set("relay_idx", relay_idx);
+    controlJson.set("power_mod", power_mode);
+    controlJson.set("last_update", (int)time(NULL));
+
+    if (!Firebase.RTDB.setJSON(&fbdo, "/recovery_data", &controlJson)) {
+        webLog("FB err(control) " + String(fbdo.httpCode()) + ": " + fbdo.errorReason());
+    }
+    }
 
 } // namespace FirebaseHandler
