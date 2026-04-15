@@ -31,13 +31,12 @@ jobs:
 
       - name: Build firmware
         run: pio run -e esp32dev
-        working-directory: ESP32
 
       - name: Commit firmware.bin + version.txt
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          cp ESP32/.pio/build/esp32dev/firmware.bin firmware.bin
+          cp .pio/build/esp32dev/firmware.bin firmware.bin
           echo "${{ github.sha }}" > version.txt
           git add firmware.bin version.txt
           git diff --staged --quiet || git commit -m "ci: update firmware [skip ci]"
