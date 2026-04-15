@@ -92,6 +92,8 @@ void setup() {
     ModbusHandler::setup();
     FirebaseHandler::setup();
 
+    Serial.println("// TEST2 UPDATE FROM AIR //");
+
     if(FirebaseHandler::recoverData(idx,power_mode))
     {
         Serial.print("Obnova stavu: Stupen="); Serial.print(idx); 
@@ -102,7 +104,6 @@ void setup() {
             digitalWrite(outputs[i], LOW);
             delay(10);
         }
-        Serial.println("Obnova dokoncena.");
     }
 
 

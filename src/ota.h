@@ -5,8 +5,8 @@
 #include "logger.h"
 
 
-#define VERSION_URL  "https://raw.githubusercontent.com/FredericBastitat/TucapyEnergyRegulation/main/version.txt"
-#define FIRMWARE_URL "https://raw.githubusercontent.com/FredericBastitat/TucapyEnergyRegulation/main/firmware.bin"
+#define VERSION_URL  "https://raw.githubusercontent.com/FredericBastitat/TucapyEnergyRegulation_ESP32/main/version.txt"
+#define FIRMWARE_URL "https://raw.githubusercontent.com/FredericBastitat/TucapyEnergyRegulation_ESP32/main/firmware.bin"
 
 namespace OTA {
 
