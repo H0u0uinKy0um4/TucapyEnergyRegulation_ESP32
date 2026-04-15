@@ -19,13 +19,13 @@ String currentVersion = "";
 #define OUT8 27
 const int outputs[] = {OUT1, OUT2, OUT3, OUT4, OUT5, OUT6, OUT7, OUT8};
 const int n_outputs=8;
-#define HORNI_PROUD 2
-#define SPODNI_PROUD 0  
 
-#define HORNI_SOC 80
-#define SPODNI_SOC 60
+int upper_soc = 80;
+int lower_soc = 60;
+int upper_A = 2;
+int lower_A = 0;
 
-#define OTA_INTERVAL 30000
+#define OTA_INTERVAL 60000
 
 
 bool power_mode=false;
@@ -92,7 +92,8 @@ void setup() {
     ModbusHandler::setup();
     FirebaseHandler::setup();
 
-    Serial.println("// TEST 3 UPDATE FROM AIR //");
+
+    FirebaseHandler::getConfigData(upper_soc,lower_soc,upper_A,lower_A);
 
     if(FirebaseHandler::recoverData(idx,power_mode))
     {
@@ -127,20 +128,20 @@ void loop() {
     {
         static unsigned long lastSwitch = 0;
         
-        if(ModbusHandler::battery_soc < SPODNI_SOC)
+        if(ModbusHandler::battery_soc < lower_soc)
         {
             power_mode = false;
             if(idx > 0) shutdown();
         }
-        if(ModbusHandler::battery_soc>=HORNI_SOC)power_mode=true;
+        if(ModbusHandler::battery_soc>=upper_soc)power_mode=true;
         
         // Mezi přepnutím stupňů čekáme aspoň 10 vteřin pro ustálení
         if (millis() - lastSwitch > 10000) {
-            if(power_mode && (ModbusHandler::battery_I>=HORNI_PROUD)) {
+            if(power_mode && (ModbusHandler::battery_I>=upper_A)) {
                 turn_on();
                 lastSwitch = millis();
             }
-            if(power_mode && (ModbusHandler::battery_I<=SPODNI_PROUD)) {
+            if(power_mode && (ModbusHandler::battery_I<=lower_A)) {
                 turn_off();
                 lastSwitch = millis();
             }

@@ -73,6 +73,25 @@ bool recoverData(int & idx, bool & power_mode)
     return true;
 }
 
+bool getConfigData(int & upper_soc, int & lower_soc, int & upper_A,int & lower_A)
+{
+    if(!Firebase.RTDB.getJSON(&fbdo,"/config_data"))return false;
+    FirebaseJson* json = fbdo.jsonObjectPtr();
+    if(!checkDataAge(*json))return false;
+
+    FirebaseJsonData res;
+    json->get(res,"upper_soc");
+    upper_soc=res.intValue;
+    json->get(res,"lower_soc");
+    lower_soc=res.intValue;
+    json->get(res,"upper_A");
+    upper_A=res.intValue;
+    json->get(res,"lower_A");
+    upper_A=res.intValue;
+    
+    return true;
+}
+
 
 
 void updateData(float battery_P, float battery_I, float grid_I, float battery_soc, String status_msg, String version, const String& consoleLogs, int relay_idx,bool power_mode) {
