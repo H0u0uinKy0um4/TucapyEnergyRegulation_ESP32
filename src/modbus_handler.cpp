@@ -36,7 +36,7 @@ bool readRegister(uint16_t reg_addr, uint8_t reg_count, T &value, const char* na
         if (attempt == 0) {
             delay(50); // Pauza před retry
         } else {
-            webLog("Chyba " + String(name) + ": 0x" + String(res, HEX));
+            webLog("Chyba " + String(name) + ": " + String(res));
         }
     }
     // NEMAZEME value – ponecháme poslední známou hodnotu
